@@ -20,6 +20,16 @@ export async function getArticles() {
     } catch (error) {
         throw error;
     }
+}export async function getNextArticles(url) {
+    try {
+        const response = await fetch(`${url}`);
+        if (!response.ok) {
+            throw new Error('API request failed');
+        }
+        return await response.json();
+    } catch (error) {
+        throw error;
+    }
 }
 export async function searchArticle(data) {
     console.log(data);

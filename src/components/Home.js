@@ -1,9 +1,11 @@
 import React, {useEffect, useState} from 'react';
-import {getArticles, searchArticle} from '../services/apiService';
+import {getArticles, getNextArticles, searchArticle} from '../services/apiService';
 
 const Home = () => {
     const [articles, setArticles] = useState([]);
     const [fav, setFavList] = useState([]);
+    const [next, setNext] = useState('');
+    const [prev, setPrev] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
 
     const handleSearchInputChange = (e) => {
@@ -29,6 +31,28 @@ const Home = () => {
             const articlesData = await getArticles();
             console.log(articlesData);
             setArticles(articlesData.results);
+            setNext(articlesData.next);
+            setPrev(articlesData.previous);
+        } catch (error) {
+            // Handle error
+        }
+    };
+
+    const getNext = async () => {
+        try {
+            const articlesData = await getNextArticles(next);
+            console.log(articlesData);
+            setArticles(articlesData.results);
+            setNext(articlesData.next);
+        } catch (error) {
+            // Handle error
+        }
+    };const getPrev = async () => {
+        try {
+            const articlesData = await getNextArticles(prev);
+            console.log(articlesData);
+            setArticles(articlesData.results);
+            setNext(articlesData.next);
         } catch (error) {
             // Handle error
         }
@@ -95,33 +119,65 @@ const Home = () => {
                     </div>
                 </form>
             </div>
-
             {
                 articles.length !== 0 ?
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {articles.map((article) => (
-                            <div key={article.id} className="bg-white rounded shadow p-4">
-                                <div className="flex flex-col h-full">
-                                    <img
-                                        src={article.image_url}
-                                        alt={article.title}
-                                        className="w-full h-40 object-cover mb-4"
-                                    />
-                                    <h2 className="text-xl font-semibold">{article.title}</h2>
-                                    <p className="text-gray-600">{article.summary}</p>
-                                    <button
-                                        onClick={() => handleFavoriteClick(article)}
-                                        className="mt-auto py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
-                                    >
-                                        {article.isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                    </div> :  <div className="bg-gray-100 p-4 rounded text-center text-gray-500">
+                   <>
+                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                           {articles.map((article) => (
+                               <div key={article.id} className="bg-white rounded shadow p-4">
+                                   <div className="flex flex-col h-full">
+                                       <img
+                                           src={article.image_url}
+                                           alt={article.title}
+                                           className="w-full h-40 object-cover mb-4"
+                                       />
+                                       <h2 className="text-xl font-semibold">{article.title}</h2>
+                                       <p className="text-gray-600">{article.summary}</p>
+                                       <button
+                                           onClick={() => handleFavoriteClick(article)}
+                                           className="mt-auto py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
+                                       >
+                                           {article.isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
+                                       </button>
+                                   </div>
+                               </div>
+                           ))}
+                       </div>
+                       <div className="flex justify-center">
+                           <nav>
+                               <ul className="flex space-x-2">
+                                   {prev !== '' && (
+                                       <li>
+                                           <button
+                                               onClick={() => getNext()}
+                                               className="py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
+                                           >
+                                               Previous
+                                           </button>
+                                       </li>
+                                   )}
+
+                                   {/* Render next button if not on the last page */}
+                                   {next !== '' && (
+                                       <li>
+                                           <button
+                                               onClick={() => getNext()}
+                                               className="py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
+                                           >
+                                               Next
+                                           </button>
+                                       </li>
+                                   )}
+                               </ul>
+                           </nav>
+                       </div>
+                   </>
+
+                :  <div className="bg-gray-100 p-4 rounded text-center text-gray-500">
                     No data to preview
                 </div>
             }
+
         </>
     );
 };
