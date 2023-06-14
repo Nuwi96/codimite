@@ -3,7 +3,7 @@ import {getArticles, getNextArticles, searchArticle} from '../services/apiServic
 
 const Home = () => {
     const [articles, setArticles] = useState([]);
-    const [fav, setFavList] = useState([]);
+    const [fav, setFavList] = useState(JSON.parse(localStorage.getItem('favList')) || []);
     const [next, setNext] = useState('');
     const [prev, setPrev] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
@@ -23,7 +23,7 @@ const Home = () => {
     };
 
     useEffect(() => {
-        fetchArticles();
+        fetchArticles()
     }, []);
 
     const fetchArticles = async () => {
@@ -59,29 +59,27 @@ const Home = () => {
     };
 
     const handleFavoriteClick = (val) => {
-        console.log(val);
-        console.log(fav.length);
-        console.log(fav);
-        localStorage.setItem('favList', JSON.stringify(fav));
+        const isFavorite = fav.find((favorite) => favorite.id === val.id);
 
-        // if(fav.length !== 0){
-            console.log('iii');
-            let isFavorite = fav.find((favorite) => favorite.id === val.id);
-            isFavorite = !!isFavorite;
-            console.log(!isFavorite);
-            if (!isFavorite) {
-                val.isFavorite = true
-                return fav.push(val)
-            } else {
-                return fav.filter((favorite) => favorite.id !== val.id);
-            }
-        // }else{
-        //     val.isFavorite = true
-        //     // fav.push(val)
-        // }
-        console.log(fav);
-        checkArrays();
+        if (!isFavorite) {
+            val.isFavorite = true;
+            setFavList([...fav, val]);
+        } else {
+            setFavList(fav.filter((favorite) => favorite.id !== val.id));
+        }
     };
+
+    useEffect(() => {
+        const storedFavList = localStorage.getItem('favList');
+        console.log(JSON.parse(storedFavList));
+        if (storedFavList) {
+            setFavList(JSON.parse(storedFavList));
+        }
+    }, []);
+
+    useEffect(() => {
+        localStorage.setItem('favList', JSON.stringify(fav));
+    }, [fav]);
 
     const checkArrays = () =>{
         console.log('checkArrays',fav);
