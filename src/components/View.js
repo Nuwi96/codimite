@@ -1,12 +1,8 @@
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import { useLocation } from 'react-router-dom';
 const View = () => {
     const location = useLocation();
     const { article } = location.state;
-
-    useEffect(() => {
-        console.log(article);
-    }, []);
 
     return (
         <>

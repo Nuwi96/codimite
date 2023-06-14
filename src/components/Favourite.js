@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from 'react';
-import {searchArticle} from "../services/apiService";
 import {toast} from "react-toastify";
 
 const Favourite = () => {
@@ -8,7 +7,7 @@ const Favourite = () => {
 
     useEffect(() => {
         localStorage.getItem('favList');
-        setArticles(JSON.parse(localStorage.getItem('favList')))
+        setArticles(JSON.parse(localStorage.getItem('favList')));
     }, []);
 
     const handleSearchInputChange = (e) => {
@@ -17,14 +16,12 @@ const Favourite = () => {
 
     const handleSearchSubmit = (e) => {
         e.preventDefault();
-        console.log(searchQuery !== '');
-        if(searchQuery !== ''){
+        if (searchQuery !== '') {
             const filteredItems = articles.filter((item) =>
                 item.title.includes(searchQuery)
             );
-            console.log(filteredItems);
             setArticles(filteredItems);
-        }else{
+        } else {
             setArticles(JSON.parse(localStorage.getItem('favList')))
         }
     };
@@ -32,7 +29,7 @@ const Favourite = () => {
     const handleFavoriteClick = (val) => {
         const updatedArticles = articles.map((article) => {
             if (article.id === val.id) {
-                return { ...article, isFavorite: false };
+                return {...article, isFavorite: false};
             }
             return article;
         });
@@ -95,7 +92,7 @@ const Favourite = () => {
                                 </div>
                             </div>
                         ))}
-                    </div> :  <div className="bg-gray-100 p-4 rounded text-center text-gray-500">
+                    </div> : <div className="bg-gray-100 p-4 rounded text-center text-gray-500">
                         No data to preview
                     </div>
             }

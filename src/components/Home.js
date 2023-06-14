@@ -1,7 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import {getArticles, getNextArticles, searchArticle} from '../services/apiService';
 import {toast} from "react-toastify";
-import { useNavigate } from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
+
 const Home = () => {
     const [articles, setArticles] = useState([]);
     const [fav, setFavList] = useState(JSON.parse(localStorage.getItem('favList')) || []);
@@ -20,13 +21,15 @@ const Home = () => {
             const articlesData = await searchArticle(searchQuery);
             const updatedArticles = articlesData.results.map((article) => {
                 const match = fav.find((favorite) => favorite.id === article.id);
-                return match ? { ...article, isFavorite: true } : { ...article, isFavorite: false };
+                return match ? {...article, isFavorite: true} : {...article, isFavorite: false};
             });
             setArticles(updatedArticles);
             setNext(articlesData.next);
             setPrev(articlesData.previous);
         } catch (error) {
-            // Handle error
+            toast.error('Something went wrong!', {
+                position: toast.POSITION.TOP_RIGHT
+            });
         }
     };
 
@@ -37,49 +40,51 @@ const Home = () => {
     const fetchArticles = async () => {
         try {
             const articlesData = await getArticles();
-            console.log(articlesData);
             const updatedArticles = articlesData.results.map((article) => {
                 const match = fav.find((favorite) => favorite.id === article.id);
-                return match ? { ...article, isFavorite: true } : { ...article, isFavorite: false };
+                return match ? {...article, isFavorite: true} : {...article, isFavorite: false};
             });
             setArticles(updatedArticles);
             setNext(articlesData.next);
             setPrev(articlesData.previous);
-            // await checkArrays();
         } catch (error) {
-            // Handle error
+            toast.error('Something went wrong!', {
+                position: toast.POSITION.TOP_RIGHT
+            });
         }
     };
 
     const getNext = async () => {
         try {
             const articlesData = await getNextArticles(next);
-            console.log(articlesData);
             const updatedArticles = articlesData.results.map((article) => {
                 const match = fav.find((favorite) => favorite.id === article.id);
-                return match ? { ...article, isFavorite: true } : { ...article, isFavorite: false };
+                return match ? {...article, isFavorite: true} : {...article, isFavorite: false};
             });
             setArticles(updatedArticles);
             setNext(articlesData.next);
             setPrev(articlesData.previous);
         } catch (error) {
-            // Handle error
+            toast.error('Something went wrong!', {
+                position: toast.POSITION.TOP_RIGHT
+            });
         }
     };
 
     const getPrev = async () => {
         try {
             const articlesData = await getNextArticles(prev);
-            console.log(articlesData);
             const updatedArticles = articlesData.results.map((article) => {
                 const match = fav.find((favorite) => favorite.id === article.id);
-                return match ? { ...article, isFavorite: true } : { ...article, isFavorite: false };
+                return match ? {...article, isFavorite: true} : {...article, isFavorite: false};
             });
             setArticles(updatedArticles);
             setNext(articlesData.next);
             setPrev(articlesData.previous);
         } catch (error) {
-            // Handle error
+            toast.error('Something went wrong!', {
+                position: toast.POSITION.TOP_RIGHT
+            });
         }
     };
 
@@ -101,7 +106,6 @@ const Home = () => {
 
     useEffect(() => {
         const storedFavList = localStorage.getItem('favList');
-        console.log(JSON.parse(storedFavList));
         if (storedFavList) {
             setFavList(JSON.parse(storedFavList));
         }
@@ -111,13 +115,13 @@ const Home = () => {
         localStorage.setItem('favList', JSON.stringify(fav));
         const updatedArticles = articles.map((article) => {
             const match = fav.find((favorite) => favorite.id === article.id);
-            return match ? { ...article, isFavorite: true } : { ...article, isFavorite: false };
+            return match ? {...article, isFavorite: true} : {...article, isFavorite: false};
         });
         setArticles(updatedArticles);
     }, [fav]);
 
     const handleViewMore = (article) => {
-        navigate('/view-more' ,  { state: { article } });
+        navigate('/view-more', {state: {article}});
     };
 
     return (
@@ -147,64 +151,66 @@ const Home = () => {
             </div>
             {
                 articles.length !== 0 ?
-                   <>
-                       <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                           {articles.map((article) => (
-                               <div key={article.id} className="bg-white rounded shadow p-4">
-                                   <div className="flex flex-col h-full">
-                                       <img
-                                           src={article.image_url}
-                                           alt={article.title}
-                                           className="w-full h-40 object-cover mb-4"
-                                       />
-                                       <h2 className="text-xl font-semibold">{article.title}</h2>
-                                       <p className="text-gray-600">{article.summary}</p>
-                                       <button
-                                           onClick={() => handleFavoriteClick(article)}
-                                           className={`mt-auto py-2 px-4 text-white rounded focus:outline-none  ${article.isFavorite ? 'text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2' : 'text-white bg-gradient-to-r from-teal-400 via-teal-500 to-teal-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-teal-300 dark:focus:ring-teal-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2'}`}
-                                       >
-                                           {article.isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
-                                       </button>
-                                       <button className="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"  onClick={() => handleViewMore(article)}>
-                                           view more
-                                       </button>
-                                   </div>
-                               </div>
-                           ))}
-                       </div>
-                       <div className="flex justify-center mb-4">
-                           <nav>
-                               <ul className="flex space-x-2">
-                                   {prev !== null && (
-                                       <li>
-                                           <button
-                                               onClick={() => getPrev()}
-                                               className="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2"
-                                           >
-                                               Previous
-                                           </button>
-                                       </li>
-                                   )}
+                    <>
+                        <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            {articles.map((article) => (
+                                <div key={article.id} className="bg-white rounded shadow p-4">
+                                    <div className="flex flex-col h-full">
+                                        <img
+                                            src={article.image_url}
+                                            alt={article.title}
+                                            className="w-full h-40 object-cover mb-4"
+                                        />
+                                        <h2 className="text-xl font-semibold">{article.title}</h2>
+                                        <p className="text-gray-600">{article.summary}</p>
+                                        <button
+                                            onClick={() => handleFavoriteClick(article)}
+                                            className={`mt-auto py-2 px-4 text-white rounded focus:outline-none  ${article.isFavorite ? 'text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2' : 'text-white bg-gradient-to-r from-teal-400 via-teal-500 to-teal-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-teal-300 dark:focus:ring-teal-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2'}`}
+                                        >
+                                            {article.isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
+                                        </button>
+                                        <button
+                                            className="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
+                                            onClick={() => handleViewMore(article)}>
+                                            view more
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="flex justify-center mb-4">
+                            <nav>
+                                <ul className="flex space-x-2">
+                                    {prev !== null && (
+                                        <li>
+                                            <button
+                                                onClick={() => getPrev()}
+                                                className="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2"
+                                            >
+                                                Previous
+                                            </button>
+                                        </li>
+                                    )}
 
-                                   {/* Render next button if not on the last page */}
-                                   {next !== null && (
-                                       <li>
-                                           <button
-                                               onClick={() => getNext()}
-                                               className="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2"
-                                           >
-                                               Next
-                                           </button>
-                                       </li>
-                                   )}
-                               </ul>
-                           </nav>
-                       </div>
-                   </>
+                                    {/* Render next button if not on the last page */}
+                                    {next !== null && (
+                                        <li>
+                                            <button
+                                                onClick={() => getNext()}
+                                                className="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2"
+                                            >
+                                                Next
+                                            </button>
+                                        </li>
+                                    )}
+                                </ul>
+                            </nav>
+                        </div>
+                    </>
 
-                :  <div className="bg-gray-100 p-4 rounded text-center text-gray-500">
-                    No data to preview
-                </div>
+                    : <div className="bg-gray-100 p-4 rounded text-center text-gray-500">
+                        No data to preview
+                    </div>
             }
 
         </>
