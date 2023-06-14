@@ -1,22 +1,30 @@
 import React, {useEffect, useState} from 'react';
 import {getArticles, getNextArticles, searchArticle} from '../services/apiService';
+import {toast} from "react-toastify";
 
 const Home = () => {
     const [articles, setArticles] = useState([]);
     const [fav, setFavList] = useState(JSON.parse(localStorage.getItem('favList')) || []);
-    const [next, setNext] = useState('');
-    const [prev, setPrev] = useState('');
+    const [next, setNext] = useState(null);
+    const [prev, setPrev] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
 
     const handleSearchInputChange = (e) => {
         setSearchQuery(e.target.value);
+        handleSearchSubmit(e);
     };
 
     const handleSearchSubmit = async (e) => {
         e.preventDefault();
         try {
             const articlesData = await searchArticle(searchQuery);
-            setArticles(articlesData.results);
+            const updatedArticles = articlesData.results.map((article) => {
+                const match = fav.find((favorite) => favorite.id === article.id);
+                return match ? { ...article, isFavorite: true } : { ...article, isFavorite: false };
+            });
+            setArticles(updatedArticles);
+            setNext(articlesData.next);
+            setPrev(articlesData.previous);
         } catch (error) {
             // Handle error
         }
@@ -30,9 +38,14 @@ const Home = () => {
         try {
             const articlesData = await getArticles();
             console.log(articlesData);
-            setArticles(articlesData.results);
+            const updatedArticles = articlesData.results.map((article) => {
+                const match = fav.find((favorite) => favorite.id === article.id);
+                return match ? { ...article, isFavorite: true } : { ...article, isFavorite: false };
+            });
+            setArticles(updatedArticles);
             setNext(articlesData.next);
             setPrev(articlesData.previous);
+            // await checkArrays();
         } catch (error) {
             // Handle error
         }
@@ -42,17 +55,29 @@ const Home = () => {
         try {
             const articlesData = await getNextArticles(next);
             console.log(articlesData);
-            setArticles(articlesData.results);
+            const updatedArticles = articlesData.results.map((article) => {
+                const match = fav.find((favorite) => favorite.id === article.id);
+                return match ? { ...article, isFavorite: true } : { ...article, isFavorite: false };
+            });
+            setArticles(updatedArticles);
             setNext(articlesData.next);
+            setPrev(articlesData.previous);
         } catch (error) {
             // Handle error
         }
-    };const getPrev = async () => {
+    };
+
+    const getPrev = async () => {
         try {
             const articlesData = await getNextArticles(prev);
             console.log(articlesData);
-            setArticles(articlesData.results);
+            const updatedArticles = articlesData.results.map((article) => {
+                const match = fav.find((favorite) => favorite.id === article.id);
+                return match ? { ...article, isFavorite: true } : { ...article, isFavorite: false };
+            });
+            setArticles(updatedArticles);
             setNext(articlesData.next);
+            setPrev(articlesData.previous);
         } catch (error) {
             // Handle error
         }
@@ -60,12 +85,17 @@ const Home = () => {
 
     const handleFavoriteClick = (val) => {
         const isFavorite = fav.find((favorite) => favorite.id === val.id);
-
         if (!isFavorite) {
             val.isFavorite = true;
             setFavList([...fav, val]);
+            toast.success('Added to favourite!', {
+                position: toast.POSITION.TOP_RIGHT
+            });
         } else {
             setFavList(fav.filter((favorite) => favorite.id !== val.id));
+            toast.info('Removed from favourite!', {
+                position: toast.POSITION.TOP_RIGHT
+            });
         }
     };
 
@@ -79,19 +109,13 @@ const Home = () => {
 
     useEffect(() => {
         localStorage.setItem('favList', JSON.stringify(fav));
+        const updatedArticles = articles.map((article) => {
+            const match = fav.find((favorite) => favorite.id === article.id);
+            return match ? { ...article, isFavorite: true } : { ...article, isFavorite: false };
+        });
+        setArticles(updatedArticles);
     }, [fav]);
 
-    const checkArrays = () =>{
-        console.log('checkArrays',fav);
-        return setArticles(articles.map((article) => {
-            const match = fav.find((favorite) => favorite.id === article.id);
-            if (match) {
-                return { ...article, isFavorite: true };
-            } else {
-                return article;
-            }
-        }))
-    }
     return (
         <>
             <div className="container mx-auto px-4 py-8">
@@ -120,7 +144,7 @@ const Home = () => {
             {
                 articles.length !== 0 ?
                    <>
-                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                       <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                            {articles.map((article) => (
                                <div key={article.id} className="bg-white rounded shadow p-4">
                                    <div className="flex flex-col h-full">
@@ -133,7 +157,7 @@ const Home = () => {
                                        <p className="text-gray-600">{article.summary}</p>
                                        <button
                                            onClick={() => handleFavoriteClick(article)}
-                                           className="mt-auto py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
+                                           className={`mt-auto py-2 px-4 text-white rounded focus:outline-none  ${article.isFavorite ? 'text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2' : 'text-white bg-gradient-to-r from-teal-400 via-teal-500 to-teal-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-teal-300 dark:focus:ring-teal-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2'}`}
                                        >
                                            {article.isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
                                        </button>
@@ -141,14 +165,14 @@ const Home = () => {
                                </div>
                            ))}
                        </div>
-                       <div className="flex justify-center">
+                       <div className="flex justify-center mb-4">
                            <nav>
                                <ul className="flex space-x-2">
-                                   {prev !== '' && (
+                                   {prev !== null && (
                                        <li>
                                            <button
-                                               onClick={() => getNext()}
-                                               className="py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
+                                               onClick={() => getPrev()}
+                                               className="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2"
                                            >
                                                Previous
                                            </button>
@@ -156,11 +180,11 @@ const Home = () => {
                                    )}
 
                                    {/* Render next button if not on the last page */}
-                                   {next !== '' && (
+                                   {next !== null && (
                                        <li>
                                            <button
                                                onClick={() => getNext()}
-                                               className="py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
+                                               className="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2"
                                            >
                                                Next
                                            </button>

@@ -1,54 +1,56 @@
 import React, {useEffect, useState} from 'react';
 import {searchArticle} from "../services/apiService";
+import {toast} from "react-toastify";
 
 const Favourite = () => {
     const [articles, setArticles] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
-    const [fav, setFavList] = useState([]);
+
     useEffect(() => {
         localStorage.getItem('favList');
         setArticles(JSON.parse(localStorage.getItem('favList')))
     }, []);
+
     const handleSearchInputChange = (e) => {
         setSearchQuery(e.target.value);
     };
 
-    const handleSearchSubmit = async (e) => {
+    const handleSearchSubmit = (e) => {
         e.preventDefault();
-        try {
-            const articlesData = await searchArticle(searchQuery);
-            setArticles(articlesData.results);
-        } catch (error) {
-            // Handle error
+        console.log(searchQuery !== '');
+        if(searchQuery !== ''){
+            const filteredItems = articles.filter((item) =>
+                item.title.includes(searchQuery)
+            );
+            console.log(filteredItems);
+            setArticles(filteredItems);
+        }else{
+            setArticles(JSON.parse(localStorage.getItem('favList')))
         }
     };
-    const handleFavoriteClick = (val) => {
-        console.log(val);
-        console.log(fav.length);
-        console.log(fav);
-        localStorage.setItem('favList', JSON.stringify(fav));
 
-        // if(fav.length !== 0){
-        console.log('iii');
-        let isFavorite = fav.find((favorite) => favorite.id === val.id);
-        isFavorite = !!isFavorite;
-        console.log(!isFavorite);
-        if (!isFavorite) {
-            val.isFavorite = true
-            return fav.push(val)
-        } else {
-            return fav.filter((favorite) => favorite.id !== val.id);
-        }
-        // }else{
-        //     val.isFavorite = true
-        //     // fav.push(val)
-        // }
-        console.log(fav);
+    const handleFavoriteClick = (val) => {
+        const updatedArticles = articles.map((article) => {
+            if (article.id === val.id) {
+                return { ...article, isFavorite: false };
+            }
+            return article;
+        });
+
+        setArticles(updatedArticles);
+
+        const updatedFavorites = updatedArticles.filter((article) => article.isFavorite);
+        localStorage.setItem('favList', JSON.stringify(updatedFavorites));
+
+        toast.info('Removed from favorites!', {
+            position: toast.POSITION.TOP_RIGHT
+        });
     };
+
     return (
         <>
             <div className="container mx-auto px-4 py-8">
-                <h1 className="text-3xl font-bold mb-4">Articles</h1>
+                <h1 className="text-3xl font-bold mb-4">Favourite Articles</h1>
                 <form onSubmit={handleSearchSubmit}>
                     <label htmlFor="default-search"
                            className="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
@@ -74,6 +76,7 @@ const Favourite = () => {
                 articles.length !== 0 ?
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {articles.map((article) => (
+                            article.isFavorite &&
                             <div key={article.id} className="bg-white rounded shadow p-4">
                                 <div className="flex flex-col h-full">
                                     <img
@@ -85,7 +88,7 @@ const Favourite = () => {
                                     <p className="text-gray-600">{article.summary}</p>
                                     <button
                                         onClick={() => handleFavoriteClick(article)}
-                                        className="mt-auto py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
+                                        className={`mt-auto py-2 px-4 text-white rounded focus:outline-none  ${article.isFavorite ? 'text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2' : 'text-white bg-gradient-to-r from-teal-400 via-teal-500 to-teal-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-teal-300 dark:focus:ring-teal-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2'}`}
                                     >
                                         {article.isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
                                     </button>
