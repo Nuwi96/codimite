@@ -5,6 +5,8 @@ import Favourite from './components/Favourite';
 import Navbar from './components/Navbar';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import './App.css';
+import View from "./components/View";
 export default function App() {
   return (
       <Router>
@@ -13,6 +15,7 @@ export default function App() {
           <Routes>
               <Route path="/" element={<Home />} />
               <Route   path="/favourite" element={<Favourite/>} />
+              <Route path="/view-more" element={<View/>} />
           </Routes>
       </Router>
   )

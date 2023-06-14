@@ -1,14 +1,14 @@
 import React, {useEffect, useState} from 'react';
 import {getArticles, getNextArticles, searchArticle} from '../services/apiService';
 import {toast} from "react-toastify";
-
+import { useNavigate } from 'react-router-dom';
 const Home = () => {
     const [articles, setArticles] = useState([]);
     const [fav, setFavList] = useState(JSON.parse(localStorage.getItem('favList')) || []);
     const [next, setNext] = useState(null);
     const [prev, setPrev] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
-
+    const navigate = useNavigate();
     const handleSearchInputChange = (e) => {
         setSearchQuery(e.target.value);
         handleSearchSubmit(e);
@@ -116,6 +116,10 @@ const Home = () => {
         setArticles(updatedArticles);
     }, [fav]);
 
+    const handleViewMore = (article) => {
+        navigate('/view-more' ,  { state: { article } });
+    };
+
     return (
         <>
             <div className="container mx-auto px-4 py-8">
@@ -160,6 +164,9 @@ const Home = () => {
                                            className={`mt-auto py-2 px-4 text-white rounded focus:outline-none  ${article.isFavorite ? 'text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2' : 'text-white bg-gradient-to-r from-teal-400 via-teal-500 to-teal-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-teal-300 dark:focus:ring-teal-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2'}`}
                                        >
                                            {article.isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
+                                       </button>
+                                       <button className="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"  onClick={() => handleViewMore(article)}>
+                                           view more
                                        </button>
                                    </div>
                                </div>
